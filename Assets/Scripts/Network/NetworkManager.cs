@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Network;
 using UnityEngine;
 
 public struct Client
@@ -34,14 +35,16 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         get; private set;
     }
 
+    private static int clientIds = 0;
+    
     public int TimeOut = 30;
 
     public Action<byte[], IPEndPoint> OnReceiveEvent;
 
     private UdpConnection connection;
 
-    private readonly Dictionary<int, Client> clients = new Dictionary<int, Client>();
-    private readonly Dictionary<IPEndPoint, int> ipToId = new Dictionary<IPEndPoint, int>();
+    private readonly Dictionary<int, Client> clients = new();
+    private readonly Dictionary<IPEndPoint, int> ipToId = new();
 
     int clientId = 0; // This id should be generated during first handshake
 
@@ -60,8 +63,6 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         this.ipAddress = ip;
 
         connection = new UdpConnection(ip, port, this);
-
-        AddClient(new IPEndPoint(ip, port));
     }
 
     void AddClient(IPEndPoint ip)
@@ -70,10 +71,9 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         {
             Debug.Log("Adding client: " + ip.Address);
 
-            int id = clientId;
             ipToId[ip] = clientId;
 
-            clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
+            clients.Add(clientId, new Client(ip, clientIds, Time.realtimeSinceStartup));
 
             clientId++;
         }
@@ -90,7 +90,24 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     public void OnReceiveData(byte[] data, IPEndPoint ip)
     {
-        AddClient(ip);
+        switch (MessageHandler.Instance.GetMessageType(data))
+        {
+            case MessageType.HandShake:
+                NetHandShake handShake = new();
+                
+                if (isServer)
+                    AddClient(new IPEndPoint(handShake.Deserialize(data).Item1, port));
+                break;
+            
+            case MessageType.Console:
+                break;
+            
+            case MessageType.Position:
+                break;
+            
+            default:
+                throw new ArgumentOutOfRangeException();
+        }
 
         if (OnReceiveEvent != null)
             OnReceiveEvent.Invoke(data, ip);
