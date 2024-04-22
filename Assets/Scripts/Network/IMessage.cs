@@ -39,7 +39,7 @@ public class NetHandShake : IMessage<(long, int)>
 
     public byte[] Serialize()
     {
-        List<byte> outData = new List<byte>();
+        List<byte> outData = new();
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 

@@ -66,19 +66,17 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     void AddClient(IPEndPoint ip)
     {
-        if (ipToId.ContainsKey(ip)) return;
-        
-        Debug.Log("Adding client: " + ip.Address);
+        if (!ipToId.ContainsKey(ip))
+        {
+            Debug.Log("Adding client: " + ip.Address);
 
-        int id = clientId;
-        ipToId[ip] = clientId;
+            int id = clientId;
+            ipToId[ip] = clientId;
 
-        clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
+            clients.Add(clientId, new Client(ip, id, Time.realtimeSinceStartup));
 
-        clientId++;
-        
-        NetHandShake message = new();
-        message.SetIp(ip);
+            clientId++;
+        }
     }
 
     void RemoveClient(IPEndPoint ip)
