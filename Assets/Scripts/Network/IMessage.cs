@@ -48,6 +48,10 @@ public class NetHandShake : IMessage<(long, int)>
 
         return outData.ToArray();
     }
+
+    public void SetIp(IPEndPoint ip)
+    {
+    }
 }
 
 public class NetConsole : IMessage<string>
