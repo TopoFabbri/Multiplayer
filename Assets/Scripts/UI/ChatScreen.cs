@@ -15,7 +15,7 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
     }
 
-    void OnReceiveDataEvent(byte[] data, IPEndPoint ep)
+    private void OnReceiveDataEvent(byte[] data)
     {
         if (NetworkManager.Instance.isServer)
         {
@@ -27,7 +27,7 @@ public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
         messages.text += message.Deserialize(data);
     }
 
-    void OnEndEdit(string str)
+    private void OnEndEdit(string str)
     {
         if (inputMessage.text != "")
         {

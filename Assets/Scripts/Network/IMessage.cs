@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using UnityEngine;
 using System;
+using System.Linq;
 using System.Text;
 using System.Net;
 
@@ -19,22 +20,26 @@ public interface IMessage<T>
     public T Deserialize(byte[] message);
 }
 
-public class NetHandShake : IMessage<(long, int)>
+public class NetHandShake : IMessage<List<int>>
 {
-    (long, int) data;
-    public (long, int) Deserialize(byte[] message)
-    {
-        (long, int) outData;
+    private readonly List<int> data = new();
 
-        outData.Item1 = BitConverter.ToInt64(message, 4);
-        outData.Item2 = BitConverter.ToInt32(message, 12);
+    public List<int> Deserialize(byte[] message)
+    {
+        List<int> outData = new();
+
+        for (int i = 4; i < message.Length; i += 4)
+        {
+            byte[] curInt = {message[i], message[i + 1], message[i + 2], message[i + 3]};
+            outData.Add(BitConverter.ToInt32(curInt, 0));
+        }
 
         return outData;
     }
 
     public MessageType GetMessageType()
     {
-       return MessageType.HandShake;
+        return MessageType.HandShake;
     }
 
     public byte[] Serialize()
@@ -43,20 +48,22 @@ public class NetHandShake : IMessage<(long, int)>
 
         outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
-        outData.AddRange(BitConverter.GetBytes(data.Item1));
-        outData.AddRange(BitConverter.GetBytes(data.Item2));
+        foreach (int i in data)
+            outData.AddRange(BitConverter.GetBytes(i));
 
         return outData.ToArray();
     }
-
-    public void SetIp(IPEndPoint ip)
+    
+    public void Add(int id)
     {
+        data.Add(id);
     }
 }
 
 public class NetConsole : IMessage<string>
 {
     public string data;
+
     public string Deserialize(byte[] message)
     {
         string outData = "";
@@ -69,7 +76,7 @@ public class NetConsole : IMessage<string>
 
     public MessageType GetMessageType()
     {
-       return MessageType.Console;
+        return MessageType.Console;
     }
 
     public byte[] Serialize()
@@ -80,7 +87,7 @@ public class NetConsole : IMessage<string>
 
         foreach (char letter in data)
             outData.Add((byte)letter);
-        
+
         return outData.ToArray();
     }
 }
