@@ -1,18 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Timers;
 using Network;
 using TMPro;
 using UnityEngine;
 
 public struct Client
 {
+    public float ms;
     public float timeStamp;
     public int id;
     public IPEndPoint ipEndPoint;
 
     public Client(IPEndPoint ipEndPoint, int id, float timeStamp)
     {
+        ms = 0f;
         this.timeStamp = timeStamp;
         this.id = id;
         this.ipEndPoint = ipEndPoint;
@@ -29,7 +32,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     public bool isServer { get; private set; }
 
-    public int TimeOut = 30;
+    public const float TimeOut = 10f;
 
     public Action<byte[]> OnReceiveEvent;
 
@@ -37,7 +40,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
 
     private readonly Dictionary<int, Client> clients = new();
     private readonly Dictionary<IPEndPoint, int> ipToId = new();
-    private List<int> ids = new();
+    private readonly List<int> ids = new();
 
     int clientIds = 0; // This id should be generated during first handshake
 
@@ -63,7 +66,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         SendToServer(handShake.Serialize());
     }
 
-    void AddClient(IPEndPoint ip)
+    private void AddClient(IPEndPoint ip)
     {
         if (ipToId.ContainsKey(ip)) return;
 
@@ -88,7 +91,7 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         }
     }
 
-    void RemoveClient(IPEndPoint ip)
+    private void RemoveClient(IPEndPoint ip)
     {
         if (ipToId.ContainsKey(ip))
         {
@@ -123,6 +126,9 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
             case MessageType.Position:
                 break;
 
+            case MessageType.PingPong:
+                break;
+            
             default:
                 throw new ArgumentOutOfRangeException();
         }
@@ -144,12 +150,22 @@ public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveDa
         }
     }
 
-    void Update()
+    private void Update()
     {
         // Flush the data in main thread
         if (connection != null)
             connection.FlushReceiveData();
         
         clientsTxt.text = "Clients: " + ids.Count;
+    }
+
+    private void CheckClientsTimeOut()
+    {
+        for (int i = 0; i < clients.Count; i++)
+        {
+            Client client = clients[i];
+            client.ms += Time.deltaTime;
+            clients[i] = client;
+        }
     }
 }
