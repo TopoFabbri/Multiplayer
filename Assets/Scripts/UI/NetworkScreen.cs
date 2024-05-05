@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
+using Network;
 
 public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {

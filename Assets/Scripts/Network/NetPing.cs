@@ -3,9 +3,9 @@ using System.Collections.Generic;
 
 namespace Network
 {
-    public class NetPing : IMessage<byte>
+    public class NetPing : IMessage<float>
     {
-        private byte data;
+        private float data;
 
         public MessageType GetMessageType()
         {
@@ -17,16 +17,21 @@ namespace Network
             List<byte> outData = new();
             
             outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
-            outData.Add(data);
+            outData.AddRange(BitConverter.GetBytes(data));
             
             return outData.ToArray();
         }
 
-        public byte Deserialize(byte[] message)
+        public float Deserialize(byte[] message)
         {
             data = message[4];
 
             return data;
+        }
+        
+        public void SetData(float data)
+        {
+            this.data = data;
         }
     }
 }
