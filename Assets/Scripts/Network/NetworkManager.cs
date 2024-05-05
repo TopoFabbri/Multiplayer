@@ -10,6 +10,9 @@ namespace Network
     {
         [SerializeField] private TextMeshProUGUI clientsTxt;
         [SerializeField] private TextMeshProUGUI msTxt;
+        [SerializeField] private float showMsFreq = 1f;
+
+        private float showMsTimer = 1f;
 
         public IPAddress ipAddress { get; private set; }
         public int port { get; private set; }
@@ -22,16 +25,14 @@ namespace Network
         private Server server;
         private Client client;
 
-        int clientIds = 0;
-
         public void StartServer(int port)
         {
             isServer = true;
-            
+
             this.port = port;
-            
+
             connection = new UdpConnection(port, this);
-            
+
             server = new Server();
         }
 
@@ -43,12 +44,17 @@ namespace Network
             ipAddress = ip;
 
             connection = new UdpConnection(ip, port, this);
-            
-            client = new Client(new IPEndPoint(ip, port), clientIds, Time.time);
+
+            client = new Client(new IPEndPoint(ip, port), -1, Time.time);
+
+            NetHandShake hs = new();
+            SendToServer(hs.Serialize());
         }
 
         public void OnReceiveData(byte[] data, IPEndPoint ip)
         {
+            client?.HandleMessage(data);
+            server?.HandleMessage(data, ip);
         }
 
         public void SendToServer(byte[] data)
@@ -62,23 +68,20 @@ namespace Network
                 return;
 
             List<Client> clients = server.GetClientsList();
-            
+
             foreach (Client clientInList in clients)
                 connection.Send(data, clientInList.ipEndPoint);
         }
-        
-        public void AddClient(IPEndPoint ip)
+
+        public void SendToClient(byte[] data, IPEndPoint ip)
         {
-            if (!isServer)
-                return;
-            
-            server.AddClient(ip);
+            connection.Send(data, ip);
         }
 
         private void Update()
         {
             connection?.FlushReceiveData();
-            
+
             UpdateUI();
             CheckClientsTimeOut();
         }
@@ -86,17 +89,29 @@ namespace Network
         private void UpdateUI()
         {
             if (server != null)
+            {
                 clientsTxt.text = "Clients:" + server.GetClientsIdList().Count;
-            
-            if (client != null)
-                msTxt.text = "ms: " + client.Ms;
+            }
+            else if (client != null)
+            {
+                showMsTimer += Time.deltaTime;
+                clientsTxt.text = "ID:" + client.id;
+
+                if (showMsTimer >= showMsFreq)
+                {
+                    while (showMsTimer > showMsFreq)
+                        showMsTimer -= showMsFreq;
+
+                    msTxt.text = "ms: " + client.Ms;
+                }
+            }
         }
-        
+
         private void CheckClientsTimeOut()
         {
             if (!isServer)
                 return;
-            
+
             server.CheckClientsTimeOut();
         }
     }

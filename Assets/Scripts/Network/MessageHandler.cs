@@ -9,7 +9,7 @@ namespace Network
 
         public static MessageHandler Instance =>  _instance ??= new MessageHandler();
         
-        public MessageType GetMessageType(byte[] data)
+        public static MessageType GetMessageType(byte[] data)
         {
             return (MessageType)BitConverter.ToInt32(data, 0);
         }
