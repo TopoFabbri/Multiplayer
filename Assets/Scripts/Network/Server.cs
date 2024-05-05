@@ -7,7 +7,7 @@ namespace Network
 {
     public class Server
     {
-        private float timeOut = 10f;
+        private const float TimeOut = 10f;
 
         private readonly Dictionary<int, Client> clients = new();
         private readonly Dictionary<IPEndPoint, int> ipToId = new();
@@ -69,7 +69,7 @@ namespace Network
                 client.Ms += Time.deltaTime;
                 clients[i] = client;
 
-                if (client.Ms > timeOut)
+                if (client.Ms > TimeOut)
                     RemoveClient(client.ipEndPoint);
             }
         }
