@@ -63,14 +63,17 @@ namespace Network
 
         public void CheckClientsTimeOut()
         {
-            for (int i = 0; i < clients.Count; i++)
+            if (clients.Count == 0)
+                return;
+            
+            foreach ((int id, Client client) in clients)
             {
-                Client client = clients[i];
                 client.Ms += Time.deltaTime;
-                clients[i] = client;
 
-                if (client.Ms > TimeOut)
-                    RemoveClient(client.ipEndPoint);
+                if (client.Ms < TimeOut) continue;
+                
+                RemoveClient(client.ipEndPoint);
+                break;
             }
         }
 
@@ -118,6 +121,9 @@ namespace Network
 
         private void HandlePing(IPEndPoint ip)
         {
+            if (!clients.ContainsKey(ipToId[ip]))
+                return;
+            
             NetPing ping = new();
             ping.SetData(clients[ipToId[ip]].Ms);
 

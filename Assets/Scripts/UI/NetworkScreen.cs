@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using System.Net;
 using Network;
+using UI;
 
 public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
 {
@@ -18,7 +19,7 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         startServerBtn.onClick.AddListener(OnStartServerBtnClick);
     }
 
-    void OnConnectBtnClick()
+    public void OnConnectBtnClick()
     {
         IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
         int port = System.Convert.ToInt32(portInputField.text);
@@ -28,14 +29,14 @@ public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
         SwitchToChatScreen();
     }
 
-    void OnStartServerBtnClick()
+    public void OnStartServerBtnClick()
     {
         int port = System.Convert.ToInt32(portInputField.text);
         NetworkManager.Instance.StartServer(port);
         SwitchToChatScreen();
     }
 
-    void SwitchToChatScreen()
+    public void SwitchToChatScreen()
     {
         ChatScreen.Instance.gameObject.SetActive(true);
         this.gameObject.SetActive(false);

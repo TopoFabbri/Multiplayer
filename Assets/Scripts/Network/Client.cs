@@ -7,9 +7,10 @@ namespace Network
 {
     public class Client
     {
+        public readonly IPEndPoint ipEndPoint;
+        
         public float timeStamp;
         public int id;
-        public IPEndPoint ipEndPoint;
         
         private List<int> clientIds = new();
         

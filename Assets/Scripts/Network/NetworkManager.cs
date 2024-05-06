@@ -95,7 +95,7 @@ namespace Network
             else if (client != null)
             {
                 showMsTimer += Time.deltaTime;
-                clientsTxt.text = "ID:" + client.id;
+                clientsTxt.text = "ID: " + client.id;
 
                 if (showMsTimer >= showMsFreq)
                 {

@@ -1,53 +1,55 @@
-﻿using System.Net;
-using Network;
+﻿using Network;
 using UnityEngine.UI;
 
-public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
+namespace UI
 {
-    public Text messages;
-    public InputField inputMessage;
-
-    protected override void Initialize()
+    public class ChatScreen : MonoBehaviourSingleton<ChatScreen>
     {
-        inputMessage.onEndEdit.AddListener(OnEndEdit);
+        public Text messages;
+        public InputField inputMessage;
 
-        this.gameObject.SetActive(false);
-
-        NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
-    }
-
-    private void OnReceiveDataEvent(byte[] data)
-    {
-        if (NetworkManager.Instance.isServer)
+        protected override void Initialize()
         {
-            NetworkManager.Instance.Broadcast(data);
+            inputMessage.onEndEdit.AddListener(OnEndEdit);
+
+            this.gameObject.SetActive(false);
+
+            NetworkManager.Instance.OnReceiveEvent += OnReceiveDataEvent;
         }
 
-        NetConsole message = new();
-        
-        messages.text += message.Deserialize(data) + System.Environment.NewLine;
-    }
+        private void OnReceiveDataEvent(byte[] data)
+        {
+            if (NetworkManager.Instance.isServer)
+            {
+                NetworkManager.Instance.Broadcast(data);
+            }
 
-    private void OnEndEdit(string str)
-    {
-        if (inputMessage.text == "") return;
+            NetConsole message = new();
         
-        NetConsole message = new();
-        message.data = str;
+            messages.text += message.Deserialize(data) + System.Environment.NewLine;
+        }
+
+        private void OnEndEdit(string str)
+        {
+            if (inputMessage.text == "") return;
+        
+            NetConsole message = new();
+            message.data = str;
             
-        if (NetworkManager.Instance.isServer)
-        {
-            NetworkManager.Instance.Broadcast(message.Serialize());
-            messages.text += inputMessage.text + System.Environment.NewLine;
-        }
-        else
-        {
-            NetworkManager.Instance.SendToServer(message.Serialize());
-        }
+            if (NetworkManager.Instance.isServer)
+            {
+                NetworkManager.Instance.Broadcast(message.Serialize());
+                messages.text += inputMessage.text + System.Environment.NewLine;
+            }
+            else
+            {
+                NetworkManager.Instance.SendToServer(message.Serialize());
+            }
 
-        inputMessage.ActivateInputField();
-        inputMessage.Select();
-        inputMessage.text = "";
+            inputMessage.ActivateInputField();
+            inputMessage.Select();
+            inputMessage.text = "";
 
+        }
     }
 }
