@@ -4,23 +4,23 @@ using UnityEngine;
 
 namespace Network
 {
-    public class NetVector3 : IMessage<Vector3>
+    public class NetVector3 : IMessage<(int id, Vector3 pos)>
     {
-        private static ulong lastMsgID = 0;
-        private Vector3 data;
+        private (int id, Vector3 pos) data;
 
-        public NetVector3(Vector3 data)
+        public NetVector3((int id, Vector3 pos) data)
         {
             this.data = data;
         }
 
-        public Vector3 Deserialize(byte[] message)
+        public (int, Vector3) Deserialize(byte[] message)
         {
-            Vector3 outData;
+            (int id, Vector3 pos) outData;
 
-            outData.x = BitConverter.ToSingle(message, 8);
-            outData.y = BitConverter.ToSingle(message, 12);
-            outData.z = BitConverter.ToSingle(message, 16);
+            outData.id = BitConverter.ToInt32(message, 4);
+            outData.pos.x = BitConverter.ToSingle(message, 8);
+            outData.pos.y = BitConverter.ToSingle(message, 12);
+            outData.pos.z = BitConverter.ToSingle(message, 16);
 
             return outData;
         }
@@ -32,17 +32,25 @@ namespace Network
 
         public byte[] Serialize()
         {
-            List<byte> outData = new List<byte>();
+            List<byte> outData = new();
 
             outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
-            outData.AddRange(BitConverter.GetBytes(lastMsgID++));
-            outData.AddRange(BitConverter.GetBytes(data.x));
-            outData.AddRange(BitConverter.GetBytes(data.y));
-            outData.AddRange(BitConverter.GetBytes(data.z));
+            outData.AddRange(BitConverter.GetBytes(data.id));
+            outData.AddRange(BitConverter.GetBytes(data.pos.x));
+            outData.AddRange(BitConverter.GetBytes(data.pos.y));
+            outData.AddRange(BitConverter.GetBytes(data.pos.z));
 
             return outData.ToArray();
         }
-
-        //Dictionary<Client,Dictionary<msgType,int>>
+        
+        public void SetId(int id)
+        {
+            data.id = id;
+        }
+        
+        public void SetPos(Vector3 pos)
+        {
+            data.pos = pos;
+        }
     }
 }

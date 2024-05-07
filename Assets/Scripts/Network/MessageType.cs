@@ -5,6 +5,7 @@
         HandShake = -1,
         Console = 0,
         Position = 1,
-        PingPong = 2
+        PingPong = 2,
+        SpawnRequest = 3
     }
 }
