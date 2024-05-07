@@ -11,6 +11,7 @@ namespace Network
 
         private readonly Dictionary<int, Client> clients = new();
         private readonly Dictionary<IPEndPoint, int> ipToId = new();
+        private readonly List<int> objIds = new();
 
         private int clientCount;
 
@@ -97,6 +98,10 @@ namespace Network
                     HandlePing(ip);
                     break;
 
+                case MessageType.SpawnRequest:
+                    
+                    break;
+                
                 default:
                     throw new ArgumentOutOfRangeException();
             }
@@ -130,6 +135,19 @@ namespace Network
             SendToClient(clients[ipToId[ip]], ping.Serialize());
 
             clients[ipToId[ip]].Ms = 0f;
+        }
+
+        private void HandleSpawnRequest(IPEndPoint ip)
+        {
+            int i = 0;
+
+            while (objIds.Contains(i))
+                i++;
+            
+            objIds.Add(i);
+            
+            NetSpawnRequest spawnRequest = new();
+            spawnRequest.SetId(i);
         }
     }
 }
