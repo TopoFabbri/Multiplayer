@@ -14,7 +14,7 @@ namespace Network
         private readonly List<int> objIds = new();
 
         private int clientCount;
-
+        
         private void AddClient(IPEndPoint ip)
         {
             Client client = new(ip, clientCount, Time.time);
@@ -99,7 +99,7 @@ namespace Network
                     break;
 
                 case MessageType.SpawnRequest:
-                    
+                    HandleSpawnRequest(ip);
                     break;
                 
                 default:

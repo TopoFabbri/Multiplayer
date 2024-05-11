@@ -13,6 +13,8 @@ namespace Network
         public int id;
         
         private List<int> clientIds = new();
+
+        public static event Action Connected; 
         
         public float Ms { get; set; }
 
@@ -47,6 +49,10 @@ namespace Network
                 case MessageType.PingPong:
                     HandlePing(message);
                     break;
+
+                case MessageType.SpawnRequest:
+                    HandleSpawnRequest(message);
+                    break;
                 
                 default:
                     throw new ArgumentOutOfRangeException();
@@ -61,6 +67,15 @@ namespace Network
             
             if (id == -1)
                 id = clientIds.Last();
+            
+            Connected?.Invoke();
+        }
+
+        private void HandleSpawnRequest(byte[] message)
+        {
+            NetSpawnRequest sr = new();
+            
+            Spawner.Instance.Spawn(sr.Deserialize(message));
         }
         
         private void HandlePing(byte[] message)
