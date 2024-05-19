@@ -1,30 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Network
+namespace Network.MessageTypes
 {
-    public class NetPing : IMessage<float>
+    public class NetPing : Message<float>
     {
         private float data;
 
-        public MessageType GetMessageType()
+        public override MessageType GetMessageType()
         {
             return MessageType.PingPong;
         }
 
-        public byte[] Serialize()
+        public override byte[] Serialize(bool fromServer)
         {
             List<byte> outData = new();
             
-            outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+            messageData.type = GetMessageType();
+            messageData.fromServer = fromServer;
+            
+            outData.AddRange(messageData.Serialize());
             outData.AddRange(BitConverter.GetBytes(data));
             
             return outData.ToArray();
         }
 
-        public float Deserialize(byte[] message)
+        public override float Deserialize(byte[] message)
         {
-            data = message[4];
+            data = message[MessageData.GetSize()];
 
             return data;
         }

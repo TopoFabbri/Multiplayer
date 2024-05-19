@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using Network.MessageTypes;
 using UnityEngine;
 
 namespace Network
 {
-    public class NetVector3 : IMessage<(int id, Vector3 pos)>
+    public class NetVector3 : Message<(int id, Vector3 pos)>
     {
         private (int id, Vector3 pos) data;
 
@@ -13,28 +14,31 @@ namespace Network
             this.data = data;
         }
 
-        public (int, Vector3) Deserialize(byte[] message)
+        public override (int, Vector3) Deserialize(byte[] message)
         {
             (int id, Vector3 pos) outData;
 
-            outData.id = BitConverter.ToInt32(message, 4);
-            outData.pos.x = BitConverter.ToSingle(message, 8);
-            outData.pos.y = BitConverter.ToSingle(message, 12);
-            outData.pos.z = BitConverter.ToSingle(message, 16);
+            outData.id = BitConverter.ToInt32(message, MessageData.GetSize());
+            outData.pos.x = BitConverter.ToSingle(message, MessageData.GetSize() + sizeof(float));
+            outData.pos.y = BitConverter.ToSingle(message, MessageData.GetSize() + sizeof(float) * 2);
+            outData.pos.z = BitConverter.ToSingle(message, MessageData.GetSize() + sizeof(float) * 3);
 
             return outData;
         }
 
-        public MessageType GetMessageType()
+        public override MessageType GetMessageType()
         {
             return MessageType.Position;
         }
 
-        public byte[] Serialize()
+        public override byte[] Serialize(bool fromServer)
         {
             List<byte> outData = new();
 
-            outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+            messageData.type = GetMessageType();
+            messageData.fromServer = fromServer;
+            
+            outData.AddRange(messageData.Serialize());
             outData.AddRange(BitConverter.GetBytes(data.id));
             outData.AddRange(BitConverter.GetBytes(data.pos.x));
             outData.AddRange(BitConverter.GetBytes(data.pos.y));

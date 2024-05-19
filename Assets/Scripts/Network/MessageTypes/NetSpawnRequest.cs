@@ -1,30 +1,33 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Network
+namespace Network.MessageTypes
 {
-    public class NetSpawnRequest : IMessage<int>
+    public class NetSpawnRequest : Message<int>
     {
         private int id;
         
-        public MessageType GetMessageType()
+        public override MessageType GetMessageType()
         {
             return MessageType.SpawnRequest;
         }
 
-        public byte[] Serialize()
+        public override byte[] Serialize(bool fromServer)
         {
             List<byte> outData = new();
             
-            outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
+            messageData.type = GetMessageType();
+            messageData.fromServer = fromServer;
+            
+            outData.AddRange(messageData.Serialize());
             outData.AddRange(BitConverter.GetBytes(id));
             
             return outData.ToArray();
         }
 
-        public int Deserialize(byte[] message)
+        public override int Deserialize(byte[] message)
         {
-            id = BitConverter.ToInt32(message, 4);
+            id = BitConverter.ToInt32(message, MessageData.GetSize());
             
             return id;
         }

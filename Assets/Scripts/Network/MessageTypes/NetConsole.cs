@@ -1,31 +1,35 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Network
+namespace Network.MessageTypes
 {
-    public class NetConsole : IMessage<string>
+    public class NetConsole : Message<string>
     {
         public string data;
 
-        public string Deserialize(byte[] message)
+        public override string Deserialize(byte[] message)
         {
             string outData = "";
 
-            for (int i = 4; i < message.Length; i++)
+            for (int i = MessageData.GetSize(); i < message.Length; i++)
                 outData += (char)message[i];
 
             return outData;
         }
 
-        public MessageType GetMessageType()
+        public override MessageType GetMessageType()
         {
             return MessageType.Console;
         }
 
-        public byte[] Serialize()
+        public override byte[] Serialize(bool fromServer)
         {
             List<byte> outData = new();
 
+            messageData.type = GetMessageType();
+            messageData.fromServer = fromServer;
+            
+            outData.AddRange(messageData.Serialize());
             outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
             foreach (char letter in data)

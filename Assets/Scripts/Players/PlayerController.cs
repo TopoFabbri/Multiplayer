@@ -1,4 +1,5 @@
 using Network;
+using Network.MessageTypes;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -66,7 +67,7 @@ namespace Players
         {
             NetSpawnRequest spawnRequest = new();
         
-            NetworkManager.Instance.SendToServer(spawnRequest.Serialize());
+            NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
         }
 
         public override void Spawn(int id)

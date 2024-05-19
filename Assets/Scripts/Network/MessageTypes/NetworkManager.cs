@@ -1,10 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Net;
 using TMPro;
 using UnityEngine;
+using Utils;
 
-namespace Network
+namespace Network.MessageTypes
 {
     public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
     {
@@ -22,10 +22,10 @@ namespace Network
 
         private UdpConnection connection;
 
-        private Server server;
+        public Server server;
         private Client client;
 
-        public void StartServer(int port)
+        public void StartServer(IPAddress ip, int port)
         {
             isServer = true;
 
@@ -34,6 +34,7 @@ namespace Network
             connection = new UdpConnection(port, this);
 
             server = new Server();
+            server.StartServerClient();
         }
 
         public void StartClient(IPAddress ip, int port)
@@ -48,18 +49,17 @@ namespace Network
             client = new Client(new IPEndPoint(ip, port), -1, Time.time);
 
             NetHandShake hs = new();
-            SendToServer(hs.Serialize());
+            SendToServer(hs.Serialize(false));
         }
 
         public void OnReceiveData(byte[] data, IPEndPoint ip)
         {
-            client?.HandleMessage(data);
-            server?.HandleMessage(data, ip);
-        }
+            Debug.Log("Received " + MessageHandler.TypeToString(MessageHandler.GetMessageData(data).type));
 
-        public void SendToServer(byte[] data)
-        {
-            connection.Send(data);
+            if (MessageHandler.GetMessageData(data).fromServer)
+                client?.HandleMessage(data);
+            else
+                server?.HandleMessage(data, ip);
         }
 
         public void Broadcast(byte[] data)
@@ -67,15 +67,27 @@ namespace Network
             if (!isServer)
                 return;
 
-            List<Client> clients = server.GetClientsList();
+            server?.Broadcast(data);
+        }
 
-            foreach (Client clientInList in clients)
-                connection.Send(data, clientInList.ipEndPoint);
+        public void SendToServer(byte[] data)
+        {
+            if (MessageHandler.GetMessageData(data).fromServer) return;
+
+            connection?.Send(data);
         }
 
         public void SendToClient(byte[] data, IPEndPoint ip)
         {
-            connection.Send(data, ip);
+            if (!MessageHandler.GetMessageData(data).fromServer) return;
+            
+            if (server.GetIdByIp(ip) == 0)
+            {
+                server.HandleMessage(data, ip);
+                return;
+            }
+
+            connection?.Send(data, ip);
         }
 
         private void Update()
@@ -91,19 +103,23 @@ namespace Network
             if (server != null)
             {
                 clientsTxt.text = "Clients:" + server.GetClientsIdList().Count;
+                
+                msTxt.text = "ms: " + server.svClient.Ms;
             }
-            else if (client != null)
-            {
-                showMsTimer += Time.deltaTime;
+            
+            if (client == null) return;
+
+            showMsTimer += Time.deltaTime;
+
+            if (!isServer)
                 clientsTxt.text = "ID: " + client.id;
 
-                if (showMsTimer >= showMsFreq)
-                {
-                    while (showMsTimer > showMsFreq)
-                        showMsTimer -= showMsFreq;
+            if (showMsTimer >= showMsFreq)
+            {
+                while (showMsTimer > showMsFreq)
+                    showMsTimer -= showMsFreq;
 
-                    msTxt.text = "ms: " + client.Ms;
-                }
+                msTxt.text = "ms: " + client.Ms;
             }
         }
 

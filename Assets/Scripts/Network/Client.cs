@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using Network.MessageTypes;
+using UnityEngine;
 
 namespace Network
 {
@@ -13,7 +15,7 @@ namespace Network
         public int id;
         
         private List<int> clientIds = new();
-
+        
         public static event Action Connected; 
         
         public float Ms { get; set; }
@@ -26,21 +28,21 @@ namespace Network
             this.ipEndPoint = ipEndPoint;
         }
         
-        private static void SendToServer(byte[] message)
+        protected virtual void SendToServer(byte[] message)
         {
             NetworkManager.Instance.SendToServer(message);
         }
 
         public void HandleMessage(byte[] message)
         {
-            switch (MessageHandler.GetMessageType(message))
+            switch (MessageHandler.GetMessageData(message).type)
             {
                 case MessageType.HandShake:
                     HandleHandShake(message);
                     break;
                 
                 case MessageType.Console:
-                    NetworkManager.Instance.OnReceiveEvent.Invoke(message);
+                    HandleConsole(message);
                     break;
                 
                 case MessageType.Position:
@@ -57,6 +59,11 @@ namespace Network
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+        
+        protected virtual void HandleConsole(byte[] message)
+        {
+            NetworkManager.Instance.OnReceiveEvent.Invoke(message);
         }
 
         private void HandleHandShake(byte[] message)
@@ -78,13 +85,33 @@ namespace Network
             Spawner.Instance.Spawn(sr.Deserialize(message));
         }
         
-        private void HandlePing(byte[] message)
+        protected virtual void HandlePing(byte[] message)
         {
             NetPing pong = new();
 
             Ms = pong.Deserialize(message);
             
-            SendToServer(pong.Serialize());
+            SendToServer(pong.Serialize(false));
+        }
+    }
+    
+    public class SvClient : Client
+    {
+        public SvClient(IPEndPoint ipEndPoint, int id, float timeStamp) : base(ipEndPoint, id, timeStamp)
+        {
+        }
+        
+        protected override void SendToServer(byte[] message)
+        {
+            NetworkManager.Instance.server.HandleMessage(message, ipEndPoint);
+        }
+
+        protected override void HandlePing(byte[] message)
+        {
+        }
+        
+        protected override void HandleConsole(byte[] message)
+        {
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Net;
+using Network.MessageTypes;
 using UnityEngine;
 
 namespace Network
@@ -14,6 +15,18 @@ namespace Network
         private readonly List<int> objIds = new();
 
         private int clientCount;
+
+        public SvClient svClient;
+        
+        public void StartServerClient()
+        {
+            svClient = new SvClient(new IPEndPoint(IPAddress.Any, 0), -1, Time.time);
+
+            AddClient(svClient.ipEndPoint);
+            
+            svClient.Ms = 0f;
+            svClient.id = 0;
+        }
         
         private void AddClient(IPEndPoint ip)
         {
@@ -27,11 +40,13 @@ namespace Network
             NetPing ping = new();
             ping.SetData(0f);
 
-            SendToClient(client, ping.Serialize());
+            SendToClient(client, ping.Serialize(true));
         }
 
         private void RemoveClient(IPEndPoint ip)
         {
+            Debug.Log("Removing client: " + ipToId[ip]);
+            
             clients.Remove(ipToId[ip]);
             ipToId.Remove(ip);
         }
@@ -49,6 +64,8 @@ namespace Network
             return list;
         }
 
+        public int GetIdByIp(IPEndPoint ip) => ipToId[ip];
+
         public List<int> GetClientsIdList()
         {
             List<int> list = new();
@@ -64,15 +81,14 @@ namespace Network
 
         public void CheckClientsTimeOut()
         {
-            if (clients.Count == 0)
-                return;
-            
             foreach ((int id, Client client) in clients)
             {
+                if (id == svClient.id) continue;
+                
                 client.Ms += Time.deltaTime;
 
                 if (client.Ms < TimeOut) continue;
-                
+
                 RemoveClient(client.ipEndPoint);
                 break;
             }
@@ -80,7 +96,13 @@ namespace Network
 
         public void HandleMessage(byte[] data, IPEndPoint ip)
         {
-            switch (MessageHandler.GetMessageType(data))
+            if (MessageHandler.GetMessageData(data).fromServer)
+            {
+                svClient.HandleMessage(data);
+                return;
+            }
+            
+            switch (MessageHandler.GetMessageData(data).type)
             {
                 case MessageType.HandShake:
                     HandleHandshake(ip);
@@ -88,7 +110,6 @@ namespace Network
 
                 case MessageType.Console:
                     NetworkManager.Instance.OnReceiveEvent.Invoke(data);
-
                     break;
 
                 case MessageType.Position:
@@ -101,15 +122,24 @@ namespace Network
                 case MessageType.SpawnRequest:
                     HandleSpawnRequest(ip);
                     break;
-                
+
                 default:
                     throw new ArgumentOutOfRangeException();
             }
         }
 
-        private static void SendToClient(Client client, byte[] data)
+        public void Broadcast(byte[] data)
         {
-            NetworkManager.Instance.SendToClient(data, client.ipEndPoint);
+            foreach ((int id, Client client) in clients)
+                SendToClient(client, data);
+        }
+
+        private void SendToClient(Client client, byte[] data)
+        {
+            if (client.id == svClient.id)
+                svClient.HandleMessage(data);
+            else
+                NetworkManager.Instance.SendToClient(data, client.ipEndPoint);
         }
 
         private void HandleHandshake(IPEndPoint ip)
@@ -118,21 +148,21 @@ namespace Network
 
             NetHandShake hs = new();
 
-            foreach ((int id, Client client) in clients)
+            foreach ((int id, Client _) in clients)
                 hs.Add(id);
 
-            NetworkManager.Instance.Broadcast(hs.Serialize());
+            NetworkManager.Instance.Broadcast(hs.Serialize(true));
         }
 
         private void HandlePing(IPEndPoint ip)
         {
             if (!clients.ContainsKey(ipToId[ip]))
                 return;
-            
+
             NetPing ping = new();
             ping.SetData(clients[ipToId[ip]].Ms);
 
-            SendToClient(clients[ipToId[ip]], ping.Serialize());
+            SendToClient(clients[ipToId[ip]], ping.Serialize(true));
 
             clients[ipToId[ip]].Ms = 0f;
         }
@@ -143,9 +173,9 @@ namespace Network
 
             while (objIds.Contains(i))
                 i++;
-            
+
             objIds.Add(i);
-            
+
             NetSpawnRequest spawnRequest = new();
             spawnRequest.SetId(i);
         }

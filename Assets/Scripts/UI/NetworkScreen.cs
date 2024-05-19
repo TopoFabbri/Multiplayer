@@ -1,44 +1,47 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
-using UnityEngine.UI;
-using System.Net;
+﻿using System.Net;
 using Network;
-using UI;
+using Network.MessageTypes;
+using UnityEngine.UI;
+using Utils;
 
-public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
+namespace UI
 {
-    public Button connectBtn;
-    public Button startServerBtn;
-    public InputField portInputField;
-    public InputField addressInputField;
-
-    protected override void Initialize()
+    public class NetworkScreen : MonoBehaviourSingleton<NetworkScreen>
     {
-        connectBtn.onClick.AddListener(OnConnectBtnClick);
-        startServerBtn.onClick.AddListener(OnStartServerBtnClick);
-    }
+        public Button connectBtn;
+        public Button startServerBtn;
+        public InputField portInputField;
+        public InputField addressInputField;
 
-    public void OnConnectBtnClick()
-    {
-        IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
-        int port = System.Convert.ToInt32(portInputField.text);
+        protected override void Initialize()
+        {
+            connectBtn.onClick.AddListener(OnConnectBtnClick);
+            startServerBtn.onClick.AddListener(OnStartServerBtnClick);
+        }
 
-        NetworkManager.Instance.StartClient(ipAddress, port);
+        public void OnConnectBtnClick()
+        {
+            IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
+            int port = System.Convert.ToInt32(portInputField.text);
+
+            NetworkManager.Instance.StartClient(ipAddress, port);
         
-        SwitchToChatScreen();
-    }
+            SwitchToChatScreen();
+        }
 
-    public void OnStartServerBtnClick()
-    {
-        int port = System.Convert.ToInt32(portInputField.text);
-        NetworkManager.Instance.StartServer(port);
-        SwitchToChatScreen();
-    }
+        public void OnStartServerBtnClick()
+        {
+            IPAddress ipAddress = IPAddress.Parse(addressInputField.text);
+            int port = System.Convert.ToInt32(portInputField.text);
+            
+            NetworkManager.Instance.StartServer(ipAddress, port);
+            SwitchToChatScreen();
+        }
 
-    public void SwitchToChatScreen()
-    {
-        ChatScreen.Instance.gameObject.SetActive(true);
-        this.gameObject.SetActive(false);
+        public void SwitchToChatScreen()
+        {
+            ChatScreen.Instance.gameObject.SetActive(true);
+            this.gameObject.SetActive(false);
+        }
     }
 }

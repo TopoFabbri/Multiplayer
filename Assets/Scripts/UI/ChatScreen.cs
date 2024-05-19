@@ -1,5 +1,7 @@
 ﻿using Network;
+using Network.MessageTypes;
 using UnityEngine.UI;
+using Utils;
 
 namespace UI
 {
@@ -38,12 +40,12 @@ namespace UI
             
             if (NetworkManager.Instance.isServer)
             {
-                NetworkManager.Instance.Broadcast(message.Serialize());
+                NetworkManager.Instance.Broadcast(message.Serialize(true));
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
             {
-                NetworkManager.Instance.SendToServer(message.Serialize());
+                NetworkManager.Instance.SendToServer(message.Serialize(false));
             }
 
             inputMessage.ActivateInputField();

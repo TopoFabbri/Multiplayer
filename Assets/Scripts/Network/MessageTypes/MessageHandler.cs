@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Net;
 
-namespace Network
+namespace Network.MessageTypes
 {
     public class MessageHandler
     {
@@ -9,9 +8,24 @@ namespace Network
 
         public static MessageHandler Instance =>  _instance ??= new MessageHandler();
         
-        public static MessageType GetMessageType(byte[] data)
+        public static MessageData GetMessageData(byte[] data)
         {
-            return (MessageType)BitConverter.ToInt32(data, 0);
+            MessageData outData = new();
+
+            int size = 0;
+            
+            outData.type = (MessageType)BitConverter.ToInt32(data, size);
+            size += sizeof(int);
+            
+            outData.fromServer = BitConverter.ToBoolean(data, size);
+            size += sizeof(bool);
+            
+            return outData;
+        }
+        
+        public static string TypeToString(MessageType type)
+        {
+            return Enum.GetName(typeof(MessageType), type);
         }
     }
 }
