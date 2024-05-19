@@ -103,6 +103,7 @@ MonoBehaviour:
   chatScreen: {fileID: 0}
   rb: {fileID: 4614097192827314850}
   camera: {fileID: 0}
+  camPos: {fileID: 173025798413669603}
   accel: 1000
   maxSpeed: 10
   camSens: 10

@@ -21,11 +21,11 @@ namespace Network
         public void StartServerClient()
         {
             svClient = new SvClient(new IPEndPoint(IPAddress.Any, 0), -1, Time.time);
-
-            AddClient(svClient.ipEndPoint);
             
             svClient.Ms = 0f;
-            svClient.id = 0;
+            
+            NetHandShake hs = new();
+            svClient.SendToServer(hs.Serialize(false));
         }
         
         private void AddClient(IPEndPoint ip)
@@ -136,7 +136,7 @@ namespace Network
 
         private void SendToClient(Client client, byte[] data)
         {
-            if (client.id == svClient.id)
+            if (client.id == 0)
                 svClient.HandleMessage(data);
             else
                 NetworkManager.Instance.SendToClient(data, client.ipEndPoint);
@@ -178,6 +178,8 @@ namespace Network
 
             NetSpawnRequest spawnRequest = new();
             spawnRequest.SetId(i);
+            
+            Broadcast(spawnRequest.Serialize(true));
         }
     }
 }

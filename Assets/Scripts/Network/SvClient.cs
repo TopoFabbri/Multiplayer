@@ -9,7 +9,7 @@ namespace Network
         {
         }
         
-        protected override void SendToServer(byte[] message)
+        public override void SendToServer(byte[] message)
         {
             NetworkManager.Instance.server.HandleMessage(message, ipEndPoint);
         }

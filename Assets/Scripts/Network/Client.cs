@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Network.MessageTypes;
-using UnityEngine;
+using Spawn;
 
 namespace Network
 {
@@ -16,7 +16,7 @@ namespace Network
         
         private List<int> clientIds = new();
         
-        public static event Action Connected; 
+        public static event Action Connected;
         
         public float Ms { get; set; }
 
@@ -28,7 +28,7 @@ namespace Network
             this.ipEndPoint = ipEndPoint;
         }
         
-        protected virtual void SendToServer(byte[] message)
+        public virtual void SendToServer(byte[] message)
         {
             NetworkManager.Instance.SendToServer(message);
         }

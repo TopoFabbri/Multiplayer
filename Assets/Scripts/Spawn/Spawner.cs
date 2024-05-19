@@ -1,7 +1,9 @@
-﻿using UnityEngine;
+﻿using Network;
+using Network.MessageTypes;
+using UnityEngine;
 using Utils;
 
-namespace Network
+namespace Spawn
 {
     public class Spawner : MonoBehaviourSingleton<Spawner>
     {
@@ -9,13 +11,35 @@ namespace Network
         [SerializeField] private Spawnable enemy;
 
         private bool spawnedPlayer;
+
+        private void OnEnable()
+        {
+            Client.Connected += OnConnected;
+        }
         
+        private void OnDisable()
+        {
+            Client.Connected -= OnConnected;
+        }
+
+        private void OnConnected()
+        {
+            NetSpawnRequest spawnRequest = new();
+        
+            if (NetworkManager.Instance.server != null)
+                NetworkManager.Instance.server.HandleMessage(spawnRequest.Serialize(false), NetworkManager.Instance.server.svClient.ipEndPoint);
+            else
+                NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
+        }
+
         public void Spawn(int id)
         {
             if (!spawnedPlayer)
                 player.Spawn(id);
             else
                 enemy.Spawn(id);
+            
+            spawnedPlayer = true;
         }
     }
 }

@@ -1,5 +1,5 @@
 using Network;
-using Network.MessageTypes;
+using UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -19,16 +19,17 @@ namespace Players
         private Vector2 moveInput;
         private float mouseX;
 
-        private void OnEnable()
+        private void Start()
         {
-            if (!NetworkManager.Instance.isServer)
-                Client.Connected += OnConnectedHandler;
-        }
-    
-        private void OnDisable()
-        {
-            if (!NetworkManager.Instance.isServer)
-                Client.Connected -= OnConnectedHandler;
+            chatScreen = ChatScreen.Instance.gameObject;
+            
+            camera = Camera.main?.transform;
+
+            if (!camera) return;
+            
+            camera.parent = camPos;
+            camera.localPosition = Vector3.zero;
+            camera.localRotation = Quaternion.identity;
         }
 
         private void OnToggleChat()
@@ -62,27 +63,12 @@ namespace Players
 
             mouseX = input.Get<Vector2>().x;
         }
-    
-        private static void OnConnectedHandler()
-        {
-            NetSpawnRequest spawnRequest = new();
-        
-            NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
-        }
 
         public override void Spawn(int id)
         {
             this.id = id;
         
-            PlayerController instance = Instantiate(this, Vector3.zero, Quaternion.identity);
-            
-            Camera cam = Camera.main;
-
-            if (!cam) return;
-            
-            cam.transform.parent = instance.camPos;
-            cam.transform.localPosition = Vector3.zero;
-            cam.transform.localRotation = Quaternion.identity;
+            Instantiate(this, Vector3.zero, Quaternion.identity);
         }
     }
 }
