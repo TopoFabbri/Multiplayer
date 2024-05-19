@@ -21,12 +21,15 @@ namespace UI
 
         private void OnReceiveDataEvent(byte[] data)
         {
-            if (NetworkManager.Instance.isServer)
-            {
-                NetworkManager.Instance.Broadcast(data);
-            }
-
             NetConsole message = new();
+            
+            message.data = message.Deserialize(data);
+            data = message.Serialize(true);
+            
+            if (NetworkManager.Instance.isServer)
+                NetworkManager.Instance.Broadcast(data);
+            
+            message = new();
         
             messages.text += message.Deserialize(data) + System.Environment.NewLine;
         }
@@ -51,7 +54,6 @@ namespace UI
             inputMessage.ActivateInputField();
             inputMessage.Select();
             inputMessage.text = "";
-
         }
     }
 }

@@ -30,7 +30,6 @@ namespace Network.MessageTypes
             messageData.fromServer = fromServer;
             
             outData.AddRange(messageData.Serialize());
-            outData.AddRange(BitConverter.GetBytes((int)GetMessageType()));
 
             foreach (char letter in data)
                 outData.Add((byte)letter);
