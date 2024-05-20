@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using Network.MessageTypes;
 using UnityEngine;
 
-namespace Network
+namespace Network.MessageTypes
 {
     public class NetVector3 : Message<(int id, Vector3 pos)>
     {
         private (int id, Vector3 pos) data;
 
+        public NetVector3()
+        {
+        }
+        
         public NetVector3((int id, Vector3 pos) data)
         {
             this.data = data;

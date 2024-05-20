@@ -4,8 +4,8 @@ namespace Network
 {
     public abstract class Spawnable : MonoBehaviour
     {
-        protected int id;
+        public int id;
 
-        public abstract void Spawn(int id);
+        public abstract Spawnable Spawn(int id);
     }
 }

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using Network.MessageTypes;
+using Players;
 using Spawn;
+using UnityEngine;
 
 namespace Network
 {
@@ -46,6 +48,7 @@ namespace Network
                     break;
                 
                 case MessageType.Position:
+                    HandlePosition(message);
                     break;
                 
                 case MessageType.PingPong:
@@ -60,7 +63,16 @@ namespace Network
                     throw new ArgumentOutOfRangeException();
             }
         }
-        
+
+        private void HandlePosition(byte[] pos)
+        {
+            NetVector3 vec3 = new();
+            
+            (int id, Vector3 pos) idPos = vec3.Deserialize(pos);
+            
+            EnemyManager.Instance.UpdatePosition(idPos.id, idPos.pos);
+        }
+
         protected virtual void HandleConsole(byte[] message)
         {
             NetworkManager.Instance.OnReceiveEvent.Invoke(message);

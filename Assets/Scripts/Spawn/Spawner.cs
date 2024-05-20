@@ -1,5 +1,6 @@
 ﻿using Network;
 using Network.MessageTypes;
+using Players;
 using UnityEngine;
 using Utils;
 
@@ -24,12 +25,11 @@ namespace Spawn
 
         private void OnConnected()
         {
+            if (spawnedPlayer) return;
+            
             NetSpawnRequest spawnRequest = new();
-        
-            if (NetworkManager.Instance.server != null)
-                NetworkManager.Instance.server.HandleMessage(spawnRequest.Serialize(false), NetworkManager.Instance.server.svClient.ipEndPoint);
-            else
-                NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
+            
+            NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
         }
 
         public void Spawn(int id)
@@ -37,7 +37,7 @@ namespace Spawn
             if (!spawnedPlayer)
                 player.Spawn(id);
             else
-                enemy.Spawn(id);
+                EnemyManager.Instance.SpawnEnemy(enemy, id);
             
             spawnedPlayer = true;
         }

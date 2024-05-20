@@ -20,10 +20,11 @@ namespace Network
         
         public void StartServerClient()
         {
-            svClient = new SvClient(new IPEndPoint(IPAddress.Any, 0), -1, Time.time);
-            
-            svClient.Ms = 0f;
-            
+            svClient = new SvClient(new IPEndPoint(IPAddress.Any, 0), -1, Time.time)
+            {
+                Ms = 0f
+            };
+
             NetHandShake hs = new();
             svClient.SendToServer(hs.Serialize(false));
         }
@@ -64,7 +65,10 @@ namespace Network
             return list;
         }
 
-        public int GetIdByIp(IPEndPoint ip) => ipToId[ip];
+        public int GetIdByIp(IPEndPoint ip)
+        {
+            return ipToId.GetValueOrDefault(ip, -1);
+        }
 
         public List<int> GetClientsIdList()
         {
@@ -113,6 +117,7 @@ namespace Network
                     break;
 
                 case MessageType.Position:
+                    HandlePosition(data);
                     break;
 
                 case MessageType.PingPong:
@@ -126,6 +131,18 @@ namespace Network
                 default:
                     throw new ArgumentOutOfRangeException();
             }
+        }
+
+        private void HandlePosition(byte[] data)
+        {
+            NetVector3 vec3 = new();
+
+            (int id, Vector3 pos) idPos = vec3.Deserialize(data);
+            
+            vec3.SetId(idPos.id);
+            vec3.SetPos(idPos.pos);
+            
+            Broadcast(vec3.Serialize(true));
         }
 
         public void Broadcast(byte[] data)

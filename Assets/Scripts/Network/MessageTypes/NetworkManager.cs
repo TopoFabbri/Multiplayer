@@ -54,7 +54,8 @@ namespace Network.MessageTypes
 
         public void OnReceiveData(byte[] data, IPEndPoint ip)
         {
-            Debug.Log("Received " + MessageHandler.TypeToString(MessageHandler.GetMessageData(data).type));
+            Debug.Log("Received " + MessageHandler.TypeToString(MessageHandler.GetMessageData(data).type) + " from: " +
+                      (server != null ? server.GetIdByIp(ip) : "Server"));
 
             if (MessageHandler.GetMessageData(data).fromServer)
                 client?.HandleMessage(data);
@@ -74,13 +75,19 @@ namespace Network.MessageTypes
         {
             if (MessageHandler.GetMessageData(data).fromServer) return;
 
+            if (server != null)
+            {
+                server.HandleMessage(data, server.svClient.ipEndPoint);
+                return;
+            }
+
             connection?.Send(data);
         }
 
         public void SendToClient(byte[] data, IPEndPoint ip)
         {
             if (!MessageHandler.GetMessageData(data).fromServer) return;
-            
+
             if (server.GetIdByIp(ip) == 0)
             {
                 server.HandleMessage(data, ip);
@@ -103,10 +110,10 @@ namespace Network.MessageTypes
             if (server != null)
             {
                 clientsTxt.text = "Clients:" + server.GetClientsIdList().Count;
-                
+
                 msTxt.text = "ms: " + server.svClient.Ms;
             }
-            
+
             if (client == null) return;
 
             showMsTimer += Time.deltaTime;

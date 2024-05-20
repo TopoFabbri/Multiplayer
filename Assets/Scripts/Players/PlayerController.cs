@@ -1,4 +1,5 @@
 using Network;
+using Network.MessageTypes;
 using UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -48,6 +49,9 @@ namespace Players
         {
             Quaternion targetRotation = transform.rotation * Quaternion.Euler(0, mouseX * Time.deltaTime * camSens, 0);
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxCamSpeed * Time.deltaTime);
+            
+            NetVector3 pos = new((id, transform.position));
+            NetworkManager.Instance.SendToServer(pos.Serialize(false));
         }
 
         private void OnMove(InputValue input)
@@ -64,11 +68,13 @@ namespace Players
             mouseX = input.Get<Vector2>().x;
         }
 
-        public override void Spawn(int id)
+        public override Spawnable Spawn(int id)
         {
-            this.id = id;
-        
-            Instantiate(this, Vector3.zero, Quaternion.identity);
+            Spawnable instance = Instantiate(this, Vector3.zero, Quaternion.identity);
+            
+            instance.id = id;
+            
+            return instance;
         }
     }
 }
