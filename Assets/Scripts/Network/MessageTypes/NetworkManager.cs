@@ -34,7 +34,6 @@ namespace Network.MessageTypes
             connection = new UdpConnection(port, this);
 
             server = new Server();
-            server.StartServerClient();
         }
 
         public void StartClient(IPAddress ip, int port)
@@ -73,14 +72,6 @@ namespace Network.MessageTypes
 
         public void SendToServer(byte[] data)
         {
-            if (MessageHandler.GetMessageData(data).fromServer) return;
-
-            if (server != null)
-            {
-                server.HandleMessage(data, server.svClient.ipEndPoint);
-                return;
-            }
-
             connection?.Send(data);
         }
 
@@ -108,11 +99,7 @@ namespace Network.MessageTypes
         private void UpdateUI()
         {
             if (server != null)
-            {
                 clientsTxt.text = "Clients:" + server.GetClientsIdList().Count;
-
-                msTxt.text = "ms: " + server.svClient.Ms;
-            }
 
             if (client == null) return;
 

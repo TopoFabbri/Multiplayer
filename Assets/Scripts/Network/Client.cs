@@ -30,7 +30,7 @@ namespace Network
             this.ipEndPoint = ipEndPoint;
         }
         
-        public virtual void SendToServer(byte[] message)
+        public void SendToServer(byte[] message)
         {
             NetworkManager.Instance.SendToServer(message);
         }
@@ -73,7 +73,7 @@ namespace Network
             EnemyManager.Instance.UpdatePosition(idPos.id, idPos.pos);
         }
 
-        protected virtual void HandleConsole(byte[] message)
+        private void HandleConsole(byte[] message)
         {
             NetworkManager.Instance.OnReceiveEvent.Invoke(message);
         }
@@ -96,8 +96,8 @@ namespace Network
             
             Spawner.Instance.Spawn(sr.Deserialize(message));
         }
-        
-        protected virtual void HandlePing(byte[] message)
+
+        private void HandlePing(byte[] message)
         {
             NetPing pong = new();
 

@@ -16,19 +16,6 @@ namespace Network
 
         private int clientCount;
 
-        public SvClient svClient;
-        
-        public void StartServerClient()
-        {
-            svClient = new SvClient(new IPEndPoint(IPAddress.Any, 0), -1, Time.time)
-            {
-                Ms = 0f
-            };
-
-            NetHandShake hs = new();
-            svClient.SendToServer(hs.Serialize(false));
-        }
-        
         private void AddClient(IPEndPoint ip)
         {
             Client client = new(ip, clientCount, Time.time);
@@ -47,7 +34,7 @@ namespace Network
         private void RemoveClient(IPEndPoint ip)
         {
             Debug.Log("Removing client: " + ipToId[ip]);
-            
+
             clients.Remove(ipToId[ip]);
             ipToId.Remove(ip);
         }
@@ -87,8 +74,6 @@ namespace Network
         {
             foreach ((int id, Client client) in clients)
             {
-                if (id == svClient.id) continue;
-                
                 client.Ms += Time.deltaTime;
 
                 if (client.Ms < TimeOut) continue;
@@ -100,12 +85,6 @@ namespace Network
 
         public void HandleMessage(byte[] data, IPEndPoint ip)
         {
-            if (MessageHandler.GetMessageData(data).fromServer)
-            {
-                svClient.HandleMessage(data);
-                return;
-            }
-            
             switch (MessageHandler.GetMessageData(data).type)
             {
                 case MessageType.HandShake:
@@ -138,10 +117,10 @@ namespace Network
             NetVector3 vec3 = new();
 
             (int id, Vector3 pos) idPos = vec3.Deserialize(data);
-            
+
             vec3.SetId(idPos.id);
             vec3.SetPos(idPos.pos);
-            
+
             Broadcast(vec3.Serialize(true));
         }
 
@@ -153,10 +132,7 @@ namespace Network
 
         private void SendToClient(Client client, byte[] data)
         {
-            if (client.id == 0)
-                svClient.HandleMessage(data);
-            else
-                NetworkManager.Instance.SendToClient(data, client.ipEndPoint);
+            NetworkManager.Instance.SendToClient(data, client.ipEndPoint);
         }
 
         private void HandleHandshake(IPEndPoint ip)
@@ -195,7 +171,7 @@ namespace Network
 
             NetSpawnRequest spawnRequest = new();
             spawnRequest.SetId(i);
-            
+
             Broadcast(spawnRequest.Serialize(true));
         }
     }
