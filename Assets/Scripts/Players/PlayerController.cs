@@ -1,5 +1,6 @@
 using Network;
 using Network.MessageTypes;
+using Spawn;
 using UI;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -70,7 +71,7 @@ namespace Players
 
         public override Spawnable Spawn(int id)
         {
-            Spawnable instance = Instantiate(this, Vector3.zero, Quaternion.identity);
+            Spawnable instance = Instantiate(this, Vector3.zero + Vector3.right * id, Quaternion.identity);
             
             instance.id = id;
             

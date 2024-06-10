@@ -12,6 +12,7 @@ namespace Spawn
         [SerializeField] private Spawnable enemy;
 
         private bool spawnedPlayer;
+        private int spawnedCounter;
 
         private void OnEnable()
         {
@@ -35,9 +36,18 @@ namespace Spawn
         public void Spawn(int id)
         {
             if (!spawnedPlayer)
+            {
+                for (int i = 0; i < id; i++)
+                {
+                    EnemyManager.Instance.SpawnEnemy(enemy, i);
+                }
+                
                 player.Spawn(id);
+            }
             else
+            {
                 EnemyManager.Instance.SpawnEnemy(enemy, id);
+            }
             
             spawnedPlayer = true;
         }

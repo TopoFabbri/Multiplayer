@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 
-namespace Network
+namespace Spawn
 {
     public abstract class Spawnable : MonoBehaviour
     {

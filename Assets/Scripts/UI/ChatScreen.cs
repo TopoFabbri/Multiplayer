@@ -1,4 +1,5 @@
-﻿using Network.MessageTypes;
+﻿using Network;
+using Network.MessageTypes;
 using UnityEngine.UI;
 using Utils;
 

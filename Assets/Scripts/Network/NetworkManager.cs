@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Net;
+using Network.MessageTypes;
 using TMPro;
 using UnityEngine;
 using Utils;
 
-namespace Network.MessageTypes
+namespace Network
 {
     public class NetworkManager : MonoBehaviourSingleton<NetworkManager>, IReceiveData
     {
