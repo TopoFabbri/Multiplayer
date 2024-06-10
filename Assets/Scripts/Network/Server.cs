@@ -28,7 +28,7 @@ namespace Network
             NetPing ping = new();
             ping.SetData(0f);
 
-            SendToClient(client, ping.Serialize(true));
+            SendToClient(client, ping.Serialize());
         }
 
         private void RemoveClient(IPEndPoint ip)
@@ -121,7 +121,7 @@ namespace Network
             vec3.SetId(idPos.id);
             vec3.SetPos(idPos.pos);
 
-            Broadcast(vec3.Serialize(true));
+            Broadcast(vec3.Serialize());
         }
 
         public void Broadcast(byte[] data)
@@ -144,7 +144,7 @@ namespace Network
             foreach ((int id, Client _) in clients)
                 hs.Add(id);
 
-            NetworkManager.Instance.Broadcast(hs.Serialize(true));
+            NetworkManager.Instance.Broadcast(hs.Serialize());
         }
 
         private void HandlePing(IPEndPoint ip)
@@ -155,7 +155,7 @@ namespace Network
             NetPing ping = new();
             ping.SetData(clients[ipToId[ip]].Ms);
 
-            SendToClient(clients[ipToId[ip]], ping.Serialize(true));
+            SendToClient(clients[ipToId[ip]], ping.Serialize());
 
             clients[ipToId[ip]].Ms = 0f;
         }
@@ -172,7 +172,7 @@ namespace Network
             NetSpawnRequest spawnRequest = new();
             spawnRequest.SetId(i);
 
-            Broadcast(spawnRequest.Serialize(true));
+            Broadcast(spawnRequest.Serialize());
         }
     }
 }

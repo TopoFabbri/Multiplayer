@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using Network.MessageTypes;
 
-namespace Network
+namespace Network.MessageTypes
 {
     public class NetHandShake : Message<List<int>>
     {
@@ -26,12 +25,11 @@ namespace Network
             return MessageType.HandShake;
         }
 
-        public override byte[] Serialize(bool fromServer)
+        public override byte[] Serialize()
         {
             List<byte> outData = new();
 
             messageData.type = GetMessageType();
-            messageData.fromServer = fromServer;
             
             outData.AddRange(messageData.Serialize());
 

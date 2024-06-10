@@ -48,7 +48,7 @@ namespace Network.MessageTypes
             client = new Client(new IPEndPoint(ip, port), -1, Time.time);
 
             NetHandShake hs = new();
-            SendToServer(hs.Serialize(false));
+            SendToServer(hs.Serialize());
         }
 
         public void OnReceiveData(byte[] data, IPEndPoint ip)
@@ -56,10 +56,8 @@ namespace Network.MessageTypes
             Debug.Log("Received " + MessageHandler.TypeToString(MessageHandler.GetMessageData(data).type) + " from: " +
                       (server != null ? server.GetIdByIp(ip) : "Server"));
 
-            if (MessageHandler.GetMessageData(data).fromServer)
-                client?.HandleMessage(data);
-            else
-                server?.HandleMessage(data, ip);
+            client?.HandleMessage(data);
+            server?.HandleMessage(data, ip);
         }
 
         public void Broadcast(byte[] data)
@@ -77,14 +75,6 @@ namespace Network.MessageTypes
 
         public void SendToClient(byte[] data, IPEndPoint ip)
         {
-            if (!MessageHandler.GetMessageData(data).fromServer) return;
-
-            if (server.GetIdByIp(ip) == 0)
-            {
-                server.HandleMessage(data, ip);
-                return;
-            }
-
             connection?.Send(data, ip);
         }
 

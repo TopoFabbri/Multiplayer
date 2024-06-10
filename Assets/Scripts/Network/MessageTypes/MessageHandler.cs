@@ -17,9 +17,6 @@ namespace Network.MessageTypes
             outData.type = (MessageType)BitConverter.ToInt32(data, size);
             size += sizeof(int);
             
-            outData.fromServer = BitConverter.ToBoolean(data, size);
-            size += sizeof(bool);
-            
             return outData;
         }
         

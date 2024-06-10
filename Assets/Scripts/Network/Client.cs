@@ -103,7 +103,7 @@ namespace Network
 
             Ms = pong.Deserialize(message);
             
-            SendToServer(pong.Serialize(false));
+            SendToServer(pong.Serialize());
         }
     }
 }

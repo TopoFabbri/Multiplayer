@@ -23,7 +23,7 @@ namespace UI
             NetConsole message = new();
             
             message.data = message.Deserialize(data);
-            data = message.Serialize(true);
+            data = message.Serialize();
             
             if (NetworkManager.Instance.isServer)
                 NetworkManager.Instance.Broadcast(data);
@@ -42,12 +42,12 @@ namespace UI
             
             if (NetworkManager.Instance.isServer)
             {
-                NetworkManager.Instance.Broadcast(message.Serialize(true));
+                NetworkManager.Instance.Broadcast(message.Serialize());
                 messages.text += inputMessage.text + System.Environment.NewLine;
             }
             else
             {
-                NetworkManager.Instance.SendToServer(message.Serialize(false));
+                NetworkManager.Instance.SendToServer(message.Serialize());
             }
 
             inputMessage.ActivateInputField();

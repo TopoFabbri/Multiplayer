@@ -29,7 +29,7 @@ namespace Spawn
             
             NetSpawnRequest spawnRequest = new();
             
-            NetworkManager.Instance.SendToServer(spawnRequest.Serialize(false));
+            NetworkManager.Instance.SendToServer(spawnRequest.Serialize());
         }
 
         public void Spawn(int id)

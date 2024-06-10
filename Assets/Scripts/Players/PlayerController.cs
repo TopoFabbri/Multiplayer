@@ -51,7 +51,7 @@ namespace Players
             transform.rotation = Quaternion.RotateTowards(transform.rotation, targetRotation, maxCamSpeed * Time.deltaTime);
             
             NetVector3 pos = new((id, transform.position));
-            NetworkManager.Instance.SendToServer(pos.Serialize(false));
+            NetworkManager.Instance.SendToServer(pos.Serialize());
         }
 
         private void OnMove(InputValue input)

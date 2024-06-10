@@ -22,12 +22,11 @@ namespace Network.MessageTypes
             return MessageType.Console;
         }
 
-        public override byte[] Serialize(bool fromServer)
+        public override byte[] Serialize()
         {
             List<byte> outData = new();
 
             messageData.type = GetMessageType();
-            messageData.fromServer = fromServer;
             
             outData.AddRange(messageData.Serialize());
 

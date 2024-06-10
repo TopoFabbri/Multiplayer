@@ -8,21 +8,19 @@ namespace Network.MessageTypes
         protected MessageData messageData;
         
         public abstract MessageType GetMessageType();
-        public abstract byte[] Serialize(bool fromServer);
+        public abstract byte[] Serialize();
         public abstract T Deserialize(byte[] message);
     }
 
     public struct MessageData
     {
         public MessageType type;
-        public bool fromServer;
 
         public byte[] Serialize()
         {
             List<byte> outData = new();
             
             outData.AddRange(BitConverter.GetBytes((int)type));
-            outData.AddRange(BitConverter.GetBytes(fromServer));
             
             return outData.ToArray();
         }
@@ -32,7 +30,6 @@ namespace Network.MessageTypes
             int size = 0;
             
             size += sizeof(MessageType);
-            size += sizeof(bool);
             
             return size;
         }
